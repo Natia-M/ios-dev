@@ -1,25 +1,25 @@
 //
-//  PostsViewController.swift
-//  lecture18
+//  CommentsViewController.swift
+//  
 //
-//  Created by naat minasiani on 12/06/2026.
+//  Created by naat minasiani on 14/06/2026.
 //
-
 import UIKit
 
-class PostsViewController: UIViewController {
+class CommentsViewController: UIViewController {
     
+    var postId: Int?
     var tableView = UITableView()
-    var posts: [Post] = []
+    var comments: [Comment] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.backgroundColor = .white
-        title = "Posts"
+        title = "Comments"
         
         setupTableView()
-        fetchPosts()
+        fetchComments()
     }
     
     func setupTableView() {
@@ -27,41 +27,34 @@ class PostsViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         tableView.dataSource = self
-        tableView.delegate = self
         
         view.addSubview(tableView)
     }
     
-    func fetchPosts() {
-        NetworkService.shared.fetchPosts { posts in
-            self.posts = posts
+    func fetchComments() {
+        guard let postId = postId else { return }
+        
+        NetworkService.shared.fetchComments(postId: postId) { comments in
+            self.comments = comments
             self.tableView.reloadData()
         }
     }
 }
 
-extension PostsViewController: UITableViewDataSource, UITableViewDelegate {
+extension CommentsViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        posts.count
+        comments.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        let comment = comments[indexPath.row]
+        
         cell.textLabel?.numberOfLines = 0
-        cell.textLabel?.text = posts[indexPath.row].title
+        cell.textLabel?.text = "\(indexPath.row + 1). \(comment.body)"
         
         return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        let selectedPost = posts[indexPath.row]
-        
-        let vc = CommentsViewController()
-        vc.postId = selectedPost.id
-        
-        navigationController?.pushViewController(vc, animated: true)
     }
 }
